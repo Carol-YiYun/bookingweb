@@ -5,11 +5,20 @@ import dotenv from "dotenv"
 import cookieParser from "cookie-parser"
 import cors from "cors"
 
-import hotelsApiRoute from "./ApiRoutes/hotels.js"
-import roomsApiRoute from "./ApiRoutes/rooms.js"
-import usersApiRoute from "./ApiRoutes/users.js"
-import authApiRoute from "./ApiRoutes/auth.js"
-import orderApiRoute from "./ApiRoutes/order.js"
+// import hotelsApiRoute from "./ApiRoutes/hotels.js"
+// import roomsApiRoute from "./ApiRoutes/rooms.js"
+// import usersApiRoute from "./ApiRoutes/users.js"
+// import authApiRoute from "./ApiRoutes/auth.js"
+// import orderApiRoute from "./ApiRoutes/order.js"
+
+import hotelsApiRoute from "./backend/ApiRoutes/hotels.js";
+import roomsApiRoute from "./backend/ApiRoutes/rooms.js";
+import usersApiRoute from "./backend/ApiRoutes/users.js";
+import authApiRoute from "./backend/ApiRoutes/auth.js";
+import orderApiRoute from "./backend/ApiRoutes/order.js";
+import { someUtil } from "./backend/JWT_Token.js";
+import { someErr } from "./backend/errorMessage.js";
+import ModelX from "./backend/models/ModelX.js";
 
 // add for vercel
 import serverless from "serverless-http";
