@@ -1,5 +1,5 @@
-import { hotelsHandler } from "../server/ApiRoutes/hotels.js";
-import { roomsHandler } from "../server/ApiRoutes/rooms.js";
+// import { hotelsHandler } from "../server/ApiRoutes/hotels.js";
+// import { roomsHandler } from "../server/ApiRoutes/rooms.js";
 
 // 極簡 Router（不依賴 express/serverless-http）
 const json = (res, code, data) => {
