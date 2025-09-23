@@ -1,6 +1,6 @@
 {
   "functions": {
-    "api/index.js": { "includeFiles": "api/backend/**" }
+    "api/index.js": { "includeFiles": "server/**" }
   },
   "rewrites": [
     { "source": "/api/v1/(.*)", "destination": "/api/index.js" },
