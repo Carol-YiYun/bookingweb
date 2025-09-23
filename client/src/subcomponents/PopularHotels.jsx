@@ -4,7 +4,7 @@ import Skeleton from '../components/Skeleton'
 
 import "./popularHotels.scss"
 
-const PopularHotels = ({ dataArray, loading }) => {
+const PopularHotels = ({ dataArray = [], loading }) => {
     // const isloading =true
     return (
         <div className='popularHotels'>
@@ -12,10 +12,15 @@ const PopularHotels = ({ dataArray, loading }) => {
             <Skeleton type="popularHotel" length={7} /> 
             //除入的遮罩是popularHotel並length={7}預設產生為七個
             :
-                 <>{dataArray.map((item, index) =>
+                 <>{Array.isArray(dataArray) && dataArray.map((item, index) =>
                             <Link to={`/hotels/${item._id}`} style={{ textDecoration: "none", color: "inherit" }}  key={index}>
                                 <div className="item" >
-                                    <img src={item.photos[0]} alt="" />
+                                    {/* <img src={item.photos[0]} alt="" /> */}
+                                    {item.photos?.[0] ? (
+                                        <img src={item.photos[0]} alt={item.name || "hotel"} />
+                                    ) : (
+                                        <span>Not ready yet</span>
+                                    )}
                                     <div className="itemInfo">
                                         <div className="title">
                                             {item.name}
