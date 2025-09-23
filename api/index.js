@@ -18,15 +18,15 @@ export default async function handler(req, res) {
   if (url === "/api/v1/test" && method === "GET")
     return json(res, 200, { msg: "test ok" });
 
-  // Hotels API
-  if (url.startsWith("/api/v1/hotels")) {
-    return hotelsHandler(req, res);
-  }
+  // // Hotels API
+  // if (url.startsWith("/api/v1/hotels")) {
+  //   return hotelsHandler(req, res);
+  // }
 
-  // Rooms API
-  if (url.startsWith("/api/v1/rooms")) {
-    return roomsHandler(req, res);
-  }
+  // // Rooms API
+  // if (url.startsWith("/api/v1/rooms")) {
+  //   return roomsHandler(req, res);
+  // }
   
 
   return json(res, 404, { error: "not found" });
