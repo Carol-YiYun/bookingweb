@@ -95,16 +95,23 @@ const handleClick = () => {
             <div className="listResult">
               <div className="resultTitle">
                 {/* <h2>在台北找到505間房間</h2> */}
-                <h2>在 {city||"推薦熱門景點"} 找到 {data.length} 間房間</h2>
+                {/* <h2>在 {city||"推薦熱門景點"} 找到 {data.length} 間房間</h2> */}
+                <h2>在 {city || "推薦熱門景點"} 找到 {Array.isArray(data) ? data.length : 0} 間房間</h2>
+
                 <div className="map">
                   <button>在地圖上顯示</button>
                 </div>
               </div>
             
               {loading ?   <Skeleton type="SearchItemSK" length={3}/> :
-              data.map((item,index) =>
-                <SearchItem active={index==0 && "active"} 
-                 key={item._id} dataDetail={item}   conditions={options} dates={date} />
+              Array.isArray(data) && data.map((item,index) =>
+                <SearchItem 
+                  active={index==0 && "active"} 
+                  key={item._id} 
+                  dataDetail={item}   
+                  conditions={options} 
+                  dates={date} 
+                />
               )
              }
          
