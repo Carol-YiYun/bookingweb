@@ -14,9 +14,10 @@ app.get("/api/v1/test", (req, res) => {
 });
 
 // 匯出給 Vercel
-// export default serverless(app);
+export default serverless(app);
 
-export default function handler(req, res) {
-  return res.status(200).json({ msg: "api alive" });
-}
+// 簡單測試
+// export default function handler(req, res) {
+//   return res.status(200).json({ msg: "api alive" });
+// }
 
