@@ -1,27 +1,23 @@
-import express from "express";
-import serverless from "serverless-http";
+// 極簡 Router（不依賴 express/serverless-http）
+const json = (res, code, data) => {
+  res.statusCode = code;
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+  res.end(JSON.stringify(data));
+};
 
-const app = express();
+export default async function handler(req, res) {
+  const { url, method } = req;
 
-// 最簡單的健康檢查
-app.get("/health", (req, res) => {
-  res.json({ ok: true, ts: Date.now() });
-});
+  // 健康檢查
+  if (url === "/health") return json(res, 200, { ok: true, ts: Date.now() });
 
-// 測試路由（不需要 rewrite，直接呼叫 /api/index.js 也會跑）
-app.get("/api/v1/test", (req, res) => {
-  res.json({ msg: "test ok" });
-});
+  // 範例測試
+  if (url === "/api/v1/test" && method === "GET")
+    return json(res, 200, { msg: "test ok" });
 
-// 匯出給 Vercel
-export default serverless(app);
+  // 之後把你的業務路由往下加：
+  // if (url.startsWith("/api/v1/hotels")) { ... }
+  // if (url.startsWith("/api/v1/rooms"))  { ... }
 
-// 簡單測試
-// export default function handler(req, res) {
-//   return res.status(200).json({ msg: "api alive" });
-// }
-
-// const handler = serverless(app);
-// export default async function (req, res) {
-//   return handler(req, res);
-// }
+  return json(res, 404, { error: "not found" });
+}
