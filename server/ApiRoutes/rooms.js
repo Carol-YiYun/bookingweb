@@ -1,30 +1,33 @@
-import express from "express"
-import { createRoom, deleteRoom, getAllRooms, getHotelRooms, getRoom, getRoomData, updatedRoom, updatedRoomDates } from "../RoutesController/room.js";
-import { verifyAdmin, verifyUser } from "../JWT_Token.js";
+import { connectDB } from "../db.js";
+import Room from "../models/Room.js";
 
-const router = express.Router()
+const json = (res, code, data) => {
+  res.statusCode = code;
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+  res.end(JSON.stringify(data));
+};
 
-//前面的url是/api/v1/rooms
-//創建第一個room 
-router.post("/:hotelid",verifyAdmin,createRoom);
-//更改room updatedRoom
-router.put("/:id",verifyAdmin,updatedRoom)
+export async function roomsHandler(req, res) {
+  const url = new URL(req.url, "http://x"); 
+  const parts = url.pathname.split("/").filter(Boolean);
+  const id = parts[3]; // /api/v1/rooms/:id
 
-//一樣是更新但我們只更新上傳unavailableDates的資料
-router.put("/reservartiondates/:id",verifyUser,updatedRoomDates)
+  try {
+    await connectDB();
 
-//刪除room
-router.delete("/:hotelid/:id",verifyAdmin,deleteRoom)
-//讀取單筆room 資料 不用hotelid
-//是因為會多此一舉roomid來抓
-router.get("/find/:id",getRoom)
+    if (req.method === "GET" && !id) {
+      const list = await Room.find().limit(50);
+      return json(res, 200, list);
+    }
 
-//配合admin的爬梳而創立用roomNumberID來抓完整roomId資料
-router.get("/findroom/:id",getRoomData)
+    if (req.method === "GET" && id) {
+      const one = await Room.findById(id);
+      return one ? json(res, 200, one) : json(res, 404, { error: "not found" });
+    }
 
-//抓取rooms所有資料
-router.get("/",getAllRooms)
-//抓取一個hotel 的rooms所有資料
-router.get("/findHotel/:hotelid/",getHotelRooms)
-
-export default router
+    return json(res, 405, { error: "method not allowed" });
+  } catch (e) {
+    console.error(e);
+    return json(res, 500, { error: "server error", detail: e.message });
+  }
+}

@@ -1,25 +1,34 @@
-import express from "express"
-import Hotel from "../models/Hotel.js"
-import { amountOfCities, amountOfType, createHotel, deleteHotel, getAllHotels, getHotel, updatedHotel } from "../RoutesController/hotels.js"
-import { verifyAdmin } from "../JWT_Token.js"
+import { connectDB } from "../db.js";
+import Hotel from "../models/Hotel.js";
 
-//這邊前面的url是/api/v1/hotels
-const router = express.Router()
-//創建第一筆資料
-router.post("/",verifyAdmin,createHotel)
-//抓取第一筆資料練習
-router.get("/find/:id",getHotel)
-//將第一筆資料做修改練習
-router.put("/:id",updatedHotel)
-//刪除資料
-router.delete("/:id",verifyAdmin,deleteHotel)
-//抓取所有住宿資料 應為目前沒有重複api url除了post的創建一樣
-//所以可以用/api/v1/hotels/ 的api url 配合get 來抓取所有住宿資料
-router.get("/",getAllHotels)
+const json = (res, code, data) => {
+  res.statusCode = code;
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+  res.end(JSON.stringify(data));
+};
 
-//要來做"依住宿類型瀏覽"的種類資料統計與分析
-router.get("/amountoftype", amountOfType)
-//要來做"依住宿城市瀏覽"的種類資料統計與分析
-router.get("/amountofcities", amountOfCities)
+export async function hotelsHandler(req, res) {
+  const url = new URL(req.url, "http://x"); // fake base for parsing
+  const parts = url.pathname.split("/").filter(Boolean); 
+  const id = parts[3]; // /api/v1/hotels/:id → index 3
 
-export default router
+  try {
+    await connectDB();
+
+    if (req.method === "GET" && !id) {
+      const list = await Hotel.find().limit(50);
+      return json(res, 200, list);
+    }
+
+    if (req.method === "GET" && id) {
+      const one = await Hotel.findById(id);
+      return one ? json(res, 200, one) : json(res, 404, { error: "not found" });
+    }
+
+    // 可再加 POST/PUT/DELETE
+    return json(res, 405, { error: "method not allowed" });
+  } catch (e) {
+    console.error(e);
+    return json(res, 500, { error: "server error", detail: e.message });
+  }
+}
