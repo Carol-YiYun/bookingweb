@@ -1,4 +1,18 @@
-import mongoose from 'mongoose';
+
+// import mongoose from 'mongoose';
+
+// 為了 vercel 部署，mongo 換成動態匯入
+let RoomModel = null;
+export async function getRoomModel(getMongoose) {
+  if (RoomModel) return RoomModel;
+  const mongoose = await getMongoose();
+  const RoomSchema = new mongoose.Schema({ /* fields */ });
+  RoomModel = mongoose.models.Room || mongoose.model("Room", RoomSchema);
+  return RoomModel;
+}
+
+
+
 const OrderSchema = new mongoose.Schema({
     userId:{type:String, required:true}, //紀錄誰下這個訂單的
     hotelId:{type:String, required:true}, //紀錄這個訂單的飯店編號

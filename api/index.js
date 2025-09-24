@@ -1,89 +1,70 @@
 // api/index.js
+// 單一 Serverless handler：不使用 express / serverless-http
 
-// 共用 mongoose 注入
-let mongooseInstance = null;
-
-async function getMongoose() {
-  if (mongooseInstance) return mongooseInstance;
-  mongooseInstance = (await import("mongoose")).default;
-  return mongooseInstance;
-}
-
-// 一次加一個 import 並測試一次 --- add for test hotelsHandler
-// import { hotelsHandler } from "../server/ApiRoutes/hotels.js";
-
-
-
+// 1) 共用：回傳 JSON
 const json = (res, code, data) => {
   res.statusCode = code;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   res.end(JSON.stringify(data));
 };
 
+// 2) 共用：動態載入 mongoose（只載一次，供所有 routes 共用）
+let mongooseInstance = null;
+async function getMongoose() {
+  if (mongooseInstance) return mongooseInstance;
+  mongooseInstance = (await import("mongoose")).default;
+  return mongooseInstance;
+}
 
-// export default async function handler(req, res) {
-//   if (req.url === "/health") return json(res, 200, { ok: true, ts: Date.now() });
-//   if (req.url === "/api/v1/test") return json(res, 200, { msg: "test ok" });
-
-//   return json(res, 404, { error: "not found" });
-// }
-
-// // 以下 --- add for test hotelsHandler
-// export default async function handler(req, res) {
-//   try {
-//     const { url, method } = req;
-
-//     // 測試 API
-//     if (url === "/health") return json(res, 200, { ok: true, ts: Date.now() });
-//     if (url === "/api/v1/test" && method === "GET") return json(res, 200, { msg: "test ok" });
-
-//     // 第一次只啟用 Hotels API
-//     if (url.startsWith("/api/v1/hotels")) return hotelsHandler(req, res);
-
-//     return json(res, 404, { error: "not found" });
-//   } catch (e) {
-//     console.error(e);
-//     return json(res, 500, { error: "server error", detail: String(e?.message || e) });
-//   }
-// }
-
-// 延遲 import
+// 3) 入口 handler
 export default async function handler(req, res) {
   const { url, method } = req;
 
   try {
-    // --- 測試 API ---
-    if (url === "/health") {
-      return json(res, 200, { ok: true, ts: Date.now() });
-    }
+    // --- 基本測試 ---
+    if (url === "/health") return json(res, 200, { ok: true, ts: Date.now() });
+    if (url === "/api/v1/test" && method === "GET") return json(res, 200, { msg: "test ok" });
 
-    if (url === "/api/v1/test" && method === "GET") {
-      return json(res, 200, { msg: "test ok" });
-    }
-
-    // --- Mongoose 連線測試 API ---
+    // --- MongoDB 連線測試（確認雲端可載入 mongoose 並可連線）---
     if (url === "/api/v1/mongo-test") {
       try {
-        const { connectDB } = await import("../server/db.js");
-        await connectDB(getMongoose);
-        const m = await getMongoose();
-
-        return json(res, 200, { msg: "mongoose connected", version: m.version });
+        const mongoose = await getMongoose();
+        if (mongoose.connection.readyState !== 1) {
+          await mongoose.connect(process.env.MONGODB);
+        }
+        return json(res, 200, { msg: "mongoose connected", version: mongoose.version });
       } catch (e) {
         return json(res, 500, { error: "mongo-test failed", detail: String(e?.message || e) });
       }
     }
 
-    // --- Hotels API ---
+    // --- 業務路由：動態載入對應檔並注入 getMongoose ---
     if (url.startsWith("/api/v1/hotels")) {
-      try {
-        const mod = await import("../server/ApiRoutes/hotels.js");
-        return mod.hotelsHandler(req, res, getMongoose);
-      } catch (e) {
-        return json(res, 500, { error: "hotels import failed", detail: String(e?.message || e) });
-      }
+      const mod = await import("../server/ApiRoutes/hotels.js");
+      return mod.hotelsHandler(req, res, getMongoose);
     }
 
+    if (url.startsWith("/api/v1/rooms")) {
+      const mod = await import("../server/ApiRoutes/rooms.js");
+      return mod.roomsHandler(req, res, getMongoose);
+    }
+
+    if (url.startsWith("/api/v1/users")) {
+      const mod = await import("../server/ApiRoutes/users.js");
+      return mod.usersHandler(req, res, getMongoose);
+    }
+
+    if (url.startsWith("/api/v1/auth")) {
+      const mod = await import("../server/ApiRoutes/auth.js");
+      return mod.authHandler(req, res, getMongoose);
+    }
+
+    if (url.startsWith("/api/v1/order")) {
+      const mod = await import("../server/ApiRoutes/order.js");
+      return mod.orderHandler(req, res, getMongoose);
+    }
+
+    // 未匹配
     return json(res, 404, { error: "not found" });
   } catch (e) {
     console.error("global handler error:", e);

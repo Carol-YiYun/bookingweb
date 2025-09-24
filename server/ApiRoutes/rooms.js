@@ -1,5 +1,7 @@
 import { connectDB } from "../db.js";
-import Room from "../models/Room.js";
+// import Room from "../models/Room.js";
+import { getRoomModel } from "../models/Room.js";
+
 
 const json = (res, code, data) => {
   res.statusCode = code;
@@ -7,13 +9,15 @@ const json = (res, code, data) => {
   res.end(JSON.stringify(data));
 };
 
-export async function roomsHandler(req, res) {
+export async function roomsHandler(req, res, getMongoose) {
   const url = new URL(req.url, "http://x"); 
   const parts = url.pathname.split("/").filter(Boolean);
   const id = parts[3]; // /api/v1/rooms/:id
 
   try {
-    await connectDB();
+    await connectDB(getMongoose);
+    const Room = await getRoomModel(getMongoose);
+
 
     if (req.method === "GET" && !id) {
       const list = await Room.find().limit(50);

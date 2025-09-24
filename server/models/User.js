@@ -1,4 +1,17 @@
-import mongoose from 'mongoose';
+// import mongoose from 'mongoose';
+
+
+// 為了 vercel 部署，mongo 換成動態匯入
+let RoomModel = null;
+export async function getRoomModel(getMongoose) {
+  if (RoomModel) return RoomModel;
+  const mongoose = await getMongoose();
+  const RoomSchema = new mongoose.Schema({ /* fields */ });
+  RoomModel = mongoose.models.Room || mongoose.model("Room", RoomSchema);
+  return RoomModel;
+}
+
+
 const UserSchma = new mongoose.Schema({
     username:{ // 用戶名稱
         type:String,
