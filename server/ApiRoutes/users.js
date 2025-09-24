@@ -48,7 +48,7 @@ async function getAllUsers(_req, res, User) {
 // 改成 handler 函數，取代 Express Router
 export async function usersHandler(req, res, getMongoose) {
   const url = new URL(req.url, "http://x");
-  const parts = url.pathname.split("/").filter(Boolean); // ["api","v1","users",":id?"]
+  const parts = url.pathname.split("/").filter(Boolean); // ["users",":id?"]
   const id = parts[3];
 
   try {

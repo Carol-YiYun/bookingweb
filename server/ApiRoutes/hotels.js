@@ -12,45 +12,118 @@ const json = (res, code, data) => {
   res.end(JSON.stringify(data));
 };
 
-/** ========== controllers ========== */
-// 取得全部 Hotels
-async function getAllHotels(_req, res, Hotel) {
-  const list = await Hotel.find().limit(50);
-  return json(res, 200, list);
+async function readBody(req) {
+  return await new Promise((resolve, reject) => {
+    let data = "";
+    req.on("data", c => (data += c));
+    req.on("end", () => {
+      try {
+        resolve(data ? JSON.parse(data) : {});
+      } catch (e) {
+        reject(e);
+      }
+    });
+    req.on("error", reject);
+  });
 }
 
-// 依 ID 取得單一 Hotel
-async function getHotelById(_req, res, Hotel, id) {
+/** ========== controllers ========== */
+// 創建 Hotel
+async function createHotel(req, res, Hotel) {
+  const body = await readBody(req);
+  const created = await Hotel.create(body);
+  return json(res, 201, created);
+}
+
+// 取得單一 Hotel
+async function getHotel(_req, res, Hotel, id) {
   const one = await Hotel.findById(id);
   return one ? json(res, 200, one) : json(res, 404, { error: "not found" });
 }
 
-// TODO: 未來可擴充 createHotel / updateHotel / deleteHotel
+// 更新 Hotel
+async function updatedHotel(req, res, Hotel, id) {
+  const body = await readBody(req);
+  const updated = await Hotel.findByIdAndUpdate(id, body, { new: true });
+  return updated ? json(res, 200, updated) : json(res, 404, { error: "not found" });
+}
+
+// 刪除 Hotel
+async function deleteHotel(_req, res, Hotel, id) {
+  const r = await Hotel.findByIdAndDelete(id);
+  return r ? json(res, 204, {}) : json(res, 404, { error: "not found" });
+}
+
+// 取得所有 Hotels
+async function getAllHotels(_req, res, Hotel) {
+  const list = await Hotel.find().limit(100);
+  return json(res, 200, list);
+}
+
+// 按住宿類型統計
+async function amountOfType(_req, res, Hotel) {
+  const data = await Hotel.aggregate([
+    { $group: { _id: "$type", count: { $sum: 1 } } }
+  ]);
+  return json(res, 200, data);
+}
+
+// 按城市統計
+async function amountOfCities(_req, res, Hotel) {
+  const data = await Hotel.aggregate([
+    { $group: { _id: "$city", count: { $sum: 1 } } }
+  ]);
+  return json(res, 200, data);
+}
 /** ========== controllers ========== */
 
-// 主 handler：判斷路由與 method，分派給對應的 controller
+// 主 handler
 export async function hotelsHandler(req, res, getMongoose) {
-  const url = new URL(req.url, "http://x");              // fake base 解析 url
-  const parts = url.pathname.split("/").filter(Boolean); // ["api","v1","hotels",":id?"]
-  const id = parts[3];                                   // /api/v1/hotels/:id → index 3
+  const url = new URL(req.url, "http://x");
+  const parts = url.pathname.split("/").filter(Boolean); // ["hotels", ...]
+  const id = parts[2]; // /hotels/find/:id → index 2
+  const subPath = parts[1]; // e.g. "find", "amountoftype", "amountofcities"
 
   try {
-    // 確保 MongoDB 已連線，並取得 model
     await connectDB(getMongoose);
     const Hotel = await getHotelModel(getMongoose);
 
-    // GET /api/v1/hotels → 取得全部
-    if (req.method === "GET" && !id) {
+    // POST /hotels
+    if (req.method === "POST" && parts[0] === "hotels" && !subPath) {
+      return createHotel(req, res, Hotel);
+    }
+
+    // GET /hotels/find/:id
+    if (req.method === "GET" && parts[0] === "hotels" && subPath === "find" && id) {
+      return getHotel(req, res, Hotel, id);
+    }
+
+    // PUT /hotels/:id
+    if (req.method === "PUT" && parts[0] === "hotels" && subPath) {
+      return updatedHotel(req, res, Hotel, subPath); // subPath 在這裡就是 id
+    }
+
+    // DELETE /hotels/:id
+    if (req.method === "DELETE" && parts[0] === "hotels" && subPath) {
+      return deleteHotel(req, res, Hotel, subPath); // subPath 在這裡就是 id
+    }
+
+    // GET /hotels
+    if (req.method === "GET" && parts[0] === "hotels" && !subPath) {
       return getAllHotels(req, res, Hotel);
     }
 
-    // GET /api/v1/hotels/:id → 取得單一
-    if (req.method === "GET" && id) {
-      return getHotelById(req, res, Hotel, id);
+    // GET /hotels/amountoftype
+    if (req.method === "GET" && parts[0] === "hotels" && subPath === "amountoftype") {
+      return amountOfType(req, res, Hotel);
     }
 
-    // 其他未支援的 method
-    return json(res, 405, { error: "method not allowed" });
+    // GET /hotels/amountofcities
+    if (req.method === "GET" && parts[0] === "hotels" && subPath === "amountofcities") {
+      return amountOfCities(req, res, Hotel);
+    }
+
+    return json(res, 405, { error: "method/path not allowed" });
   } catch (e) {
     console.error("hotels handler error:", e);
     return json(res, 500, { error: "server error", detail: String(e?.message || e) });
@@ -59,37 +132,46 @@ export async function hotelsHandler(req, res, getMongoose) {
 
 
 
+// /** ========== controllers ========== */
+// // 取得全部 Hotels
+// async function getAllHotels(_req, res, Hotel) {
+//   const list = await Hotel.find().limit(50);
+//   return json(res, 200, list);
+// }
+
+// // 依 ID 取得單一 Hotel
+// async function getHotelById(_req, res, Hotel, id) {
+//   const one = await Hotel.findById(id);
+//   return one ? json(res, 200, one) : json(res, 404, { error: "not found" });
+// }
+
+// // TODO: 未來可擴充 createHotel / updateHotel / deleteHotel
+// /** ========== controllers ========== */
+
+// // 主 handler：判斷路由與 method，分派給對應的 controller
 // export async function hotelsHandler(req, res, getMongoose) {
-//   const url = new URL(req.url, "http://x"); // fake base for parsing
-//   const parts = url.pathname.split("/").filter(Boolean); 
-//   const id = parts[3]; // /api/v1/hotels/:id → index 3
+//   const url = new URL(req.url, "http://x");              // fake base 解析 url
+//   const parts = url.pathname.split("/").filter(Boolean); // ["api","v1","hotels",":id?"]
+//   const id = parts[3];                                   // /api/v1/hotels/:id → index 3
 
 //   try {
-//     // await connectDB();
-//     // 20250925 added
-//     // const Hotel = await getHotelModel();  // ← 重要：動態取得 model
-
-//     const mongoose = await connectDB(getMongoose);
+//     // 確保 MongoDB 已連線，並取得 model
+//     await connectDB(getMongoose);
 //     const Hotel = await getHotelModel(getMongoose);
 
-
+//     // GET /api/v1/hotels → 取得全部
 //     if (req.method === "GET" && !id) {
-//       const list = await Hotel.find().limit(50);
-//       return json(res, 200, list);
+//       return getAllHotels(req, res, Hotel);
 //     }
 
+//     // GET /api/v1/hotels/:id → 取得單一
 //     if (req.method === "GET" && id) {
-//       const one = await Hotel.findById(id);
-//       return one ? json(res, 200, one) : json(res, 404, { error: "not found" });
+//       return getHotelById(req, res, Hotel, id);
 //     }
 
-//     // 可再加 POST/PUT/DELETE
+//     // 其他未支援的 method
 //     return json(res, 405, { error: "method not allowed" });
 //   } catch (e) {
-//     // console.error(e);
-//     // return json(res, 500, { error: "server error", detail: e.message });
-
-//     // 20250925 added
 //     console.error("hotels handler error:", e);
 //     return json(res, 500, { error: "server error", detail: String(e?.message || e) });
 //   }

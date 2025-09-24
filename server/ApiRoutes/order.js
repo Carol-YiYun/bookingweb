@@ -82,26 +82,26 @@ export async function orderHandler(req, res, getMongoose) {
     await connectDB(getMongoose);
     const Order = await getOrderModel(getMongoose);
 
-    // POST /api/v1/order
+    // POST /order
     if (req.method === "POST" && !id) return createOrder(req, res, Order);
 
-    // GET /api/v1/order/find/:id
+    // GET /order/find/:id
     if (req.method === "GET" && subPath === "find" && id)
       return getOrder(req, res, Order, id);
 
-    // PUT /api/v1/order/:id
+    // PUT /order/:id
     if (req.method === "PUT" && id) return updatedOrder(req, res, Order, id);
 
-    // DELETE /api/v1/order/:id
+    // DELETE /order/:id
     if (req.method === "DELETE" && id) return deleteOrder(req, res, Order, id);
 
-    // DELETE /api/v1/order
+    // DELETE /order (全部)
     if (req.method === "DELETE" && !id) return deleteAllOrder(req, res, Order);
 
-    // GET /api/v1/order (全部)
+    // GET /order (全部)
     if (req.method === "GET" && !id && !subPath) return getAllOrders(req, res, Order);
 
-    // GET /api/v1/order/data
+    // GET /order/data
     if (req.method === "GET" && subPath === "data") return getOrderData(req, res, Order);
 
     return json(res, 405, { error: "method/path not allowed" });
