@@ -55,6 +55,7 @@ export async function connectDB(getMongoose) {
 
   if (connected || mongoose.connection.readyState === 1) return mongoose;
 
+  mongoose.set("strictQuery", true);
   await mongoose.connect(process.env.MONGODB);
   connected = true;
   return mongoose;

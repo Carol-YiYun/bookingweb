@@ -80,10 +80,12 @@ async function amountOfCities(_req, res, Hotel) {
 // 主 handler
 export async function hotelsHandler(req, res, getMongoose) {
   // 先記錄進來的 URL
-  console.log("hotels url =", req.url);
-  
+  console.log("=== hotels handler in ===");
+  console.log("req.url =", req.url);
+
   const url = new URL(req.url, "http://x");
   const parts = url.pathname.split("/").filter(Boolean); // ["api","v1","hotels", ...]
+  console.log("parts =", parts);
 
   // const id = parts[2]; // /hotels/find/:id → index 2
   // const subPath = parts[1]; // e.g. "find", "amountoftype", "amountofcities"
