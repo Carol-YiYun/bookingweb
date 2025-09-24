@@ -17,15 +17,31 @@
 
 
 // 以下 20250925 added
-let connected = false;
+// let connected = false;
+
+// export async function connectDB() {
+//   if (connected) return;
+
+//   const mongoose = (await import("mongoose")).default;
+//   if (mongoose.connection.readyState === 1) { connected = true; return; }
+
+//   await mongoose.connect(process.env.MONGODB);
+//   connected = true;
+// }
+
+
+// 20250925 - 2nd updated
+let mongooseInstance = null;
 
 export async function connectDB() {
-  if (connected) return;
+  if (mongooseInstance) return mongooseInstance;
 
   const mongoose = (await import("mongoose")).default;
-  if (mongoose.connection.readyState === 1) { connected = true; return; }
 
-  await mongoose.connect(process.env.MONGODB);
-  connected = true;
+  if (mongoose.connection.readyState !== 1) {
+    await mongoose.connect(process.env.MONGODB);
+  }
+
+  mongooseInstance = mongoose;
+  return mongoose;
 }
-

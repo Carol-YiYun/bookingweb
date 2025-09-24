@@ -1,3 +1,6 @@
+// api/index.js
+
+
 
 // 一次加一個 import 並測試一次 --- add for test hotelsHandler
 // import { hotelsHandler } from "../server/ApiRoutes/hotels.js";
@@ -41,19 +44,41 @@ const json = (res, code, data) => {
 export default async function handler(req, res) {
   const { url, method } = req;
 
-  if (url === "/health") return json(res, 200, { ok: true, ts: Date.now() });
-  if (url === "/api/v1/test" && method === "GET") return json(res, 200, { msg: "test ok" });
-
-  if (url.startsWith("/api/v1/hotels")) {
-    try {
-      const mod = await import("../server/ApiRoutes/hotels.js");   // ← 動態載入
-      return mod.hotelsHandler(req, res);
-    } catch (e) {
-      console.error("hotels import error:", e);
-      return json(res, 500, { error: "hotels import failed", detail: String(e?.message || e) });
+  try {
+    // --- 測試 API ---
+    if (url === "/health") {
+      return json(res, 200, { ok: true, ts: Date.now() });
     }
-  }
 
-  return json(res, 404, { error: "not found" });
+    if (url === "/api/v1/test" && method === "GET") {
+      return json(res, 200, { msg: "test ok" });
+    }
+
+    // --- Mongoose 連線測試 API ---
+    if (url === "/api/v1/mongo-test") {
+      try {
+        const { connectDB } = await import("../server/db.js");
+        await connectDB();
+        return json(res, 200, { msg: "mongoose connected" });
+      } catch (e) {
+        return json(res, 500, { error: "mongo-test failed", detail: String(e?.message || e) });
+      }
+    }
+
+    // --- Hotels API ---
+    if (url.startsWith("/api/v1/hotels")) {
+      try {
+        const mod = await import("../server/ApiRoutes/hotels.js");
+        return mod.hotelsHandler(req, res);
+      } catch (e) {
+        return json(res, 500, { error: "hotels import failed", detail: String(e?.message || e) });
+      }
+    }
+
+    return json(res, 404, { error: "not found" });
+  } catch (e) {
+    console.error("global handler error:", e);
+    return json(res, 500, { error: "server error", detail: String(e?.message || e) });
+  }
 }
 
