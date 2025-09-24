@@ -79,14 +79,20 @@ async function amountOfCities(_req, res, Hotel) {
 
 // 主 handler
 export async function hotelsHandler(req, res, getMongoose) {
+  // 先記錄進來的 URL
+  console.log("hotels url =", req.url);
+  
   const url = new URL(req.url, "http://x");
   const parts = url.pathname.split("/").filter(Boolean); // ["api","v1","hotels", ...]
 
   // const id = parts[2]; // /hotels/find/:id → index 2
   // const subPath = parts[1]; // e.g. "find", "amountoftype", "amountofcities"
   
-  const base = 2;                                       // 固定 "hotels" 的索引
-  if (parts[base] !== "hotels") return json(res, 405, { error: "method/path not allowed" });
+  // const base = 2;                                       // 固定 "hotels" 的索引
+  // if (parts[base] !== "hotels") return json(res, 405, { error: "method/path not allowed" });
+  const base = parts.indexOf("hotels");
+  if (base === -1) return json(res, 405, { error: "method/path not allowed" });
+
 
   const seg1 = parts[base + 1]; // 可能是 undefined | "find" | ":id" | "amountoftype" | "amountofcities"
   const seg2 = parts[base + 2]; // 當 seg1 === "find" 時的 :id
