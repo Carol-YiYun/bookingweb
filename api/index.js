@@ -1,9 +1,12 @@
-export default async function handler(req, res) {
-  try {
-    const mongoose = (await import("mongoose")).default; // ESM 動態載入
-    return res.status(200).json({ ok: true, mongoose: mongoose?.version || "loaded" });
-  } catch (e) {
-    return res.status(500).json({ ok: false, error: String(e.message || e) });
-  }
-}
+const json = (res, code, data) => {
+  res.statusCode = code;
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+  res.end(JSON.stringify(data));
+};
 
+export default async function handler(req, res) {
+  if (req.url === "/health") return json(res, 200, { ok: true, ts: Date.now() });
+  if (req.url === "/api/v1/test") return json(res, 200, { msg: "test ok" });
+
+  return json(res, 404, { error: "not found" });
+}
