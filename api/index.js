@@ -65,8 +65,10 @@ export default async function handler(req, res) {
     if (url === "/api/v1/mongo-test") {
       try {
         const { connectDB } = await import("../server/db.js");
-        await connectDB();
-        return json(res, 200, { msg: "mongoose connected" });
+        await connectDB(getMongoose);
+        const m = await getMongoose();
+
+        return json(res, 200, { msg: "mongoose connected", version: m.version });
       } catch (e) {
         return json(res, 500, { error: "mongo-test failed", detail: String(e?.message || e) });
       }
@@ -76,7 +78,7 @@ export default async function handler(req, res) {
     if (url.startsWith("/api/v1/hotels")) {
       try {
         const mod = await import("../server/ApiRoutes/hotels.js");
-        return mod.hotelsHandler(req, res);
+        return mod.hotelsHandler(req, res, getMongoose);
       } catch (e) {
         return json(res, 500, { error: "hotels import failed", detail: String(e?.message || e) });
       }
