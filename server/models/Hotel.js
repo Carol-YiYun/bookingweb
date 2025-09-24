@@ -59,10 +59,12 @@
 // 以下是為了部署到 Vercel 所做的改動
 let HotelModel = null;
 
-export async function getHotelModel() {
+export async function getHotelModel(getMongoose) {
   if (HotelModel) return HotelModel;
 
-  const mongoose = (await import("mongoose")).default;
+  // const mongoose = (await import("mongoose")).default;
+  const mongoose = await getMongoose();
+
 
   const HotelSchema = new mongoose.Schema({
     name: { type: String, required: true },

@@ -1,6 +1,13 @@
 // api/index.js
 
+// 共用 mongoose 注入
+let mongooseInstance = null;
 
+async function getMongoose() {
+  if (mongooseInstance) return mongooseInstance;
+  mongooseInstance = (await import("mongoose")).default;
+  return mongooseInstance;
+}
 
 // 一次加一個 import 並測試一次 --- add for test hotelsHandler
 // import { hotelsHandler } from "../server/ApiRoutes/hotels.js";

@@ -31,17 +31,32 @@
 
 
 // 20250925 - 2nd updated
-let mongooseInstance = null;
+// let mongooseInstance = null;
 
-export async function connectDB() {
-  if (mongooseInstance) return mongooseInstance;
+// export async function connectDB() {
+//   if (mongooseInstance) return mongooseInstance;
 
-  const mongoose = (await import("mongoose")).default;
+//   const mongoose = (await import("mongoose")).default;
 
-  if (mongoose.connection.readyState !== 1) {
-    await mongoose.connect(process.env.MONGODB);
-  }
+//   if (mongoose.connection.readyState !== 1) {
+//     await mongoose.connect(process.env.MONGODB);
+//   }
 
-  mongooseInstance = mongoose;
+//   mongooseInstance = mongoose;
+//   return mongoose;
+// }
+
+
+// 3rd updated
+let connected = false;
+
+export async function connectDB(getMongoose) {
+  const mongoose = await getMongoose();
+
+  if (connected || mongoose.connection.readyState === 1) return mongoose;
+
+  await mongoose.connect(process.env.MONGODB);
+  connected = true;
   return mongoose;
 }
+

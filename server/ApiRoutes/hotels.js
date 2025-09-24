@@ -1,7 +1,9 @@
 // server/ApiRoutes/hotels.js
 
 import { connectDB } from "../db.js";
-import Hotel from "../models/Hotel.js";
+import { getHotelModel } from "../models/Hotel.js";
+
+// import Hotel from "../models/Hotel.js";
 
 const json = (res, code, data) => {
   res.statusCode = code;
@@ -9,15 +11,18 @@ const json = (res, code, data) => {
   res.end(JSON.stringify(data));
 };
 
-export async function hotelsHandler(req, res) {
+export async function hotelsHandler(req, res, getMongoose) {
   const url = new URL(req.url, "http://x"); // fake base for parsing
   const parts = url.pathname.split("/").filter(Boolean); 
   const id = parts[3]; // /api/v1/hotels/:id → index 3
 
   try {
-    await connectDB();
+    // await connectDB();
     // 20250925 added
-    const Hotel = await getHotelModel();  // ← 重要：動態取得 model
+    // const Hotel = await getHotelModel();  // ← 重要：動態取得 model
+
+    const mongoose = await connectDB(getMongoose);
+    const Hotel = await getHotelModel(getMongoose);
 
 
     if (req.method === "GET" && !id) {
