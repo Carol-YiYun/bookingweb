@@ -15,13 +15,17 @@
 //   });
 // }
 
-let mongooseInstance = null;
+
+// 以下 20250925 added
+let connected = false;
 
 export async function connectDB() {
-  if (mongooseInstance) return mongooseInstance;
+  if (connected) return;
+
   const mongoose = (await import("mongoose")).default;
-  const conn = await mongoose.connect(process.env.MONGODB);
-  mongooseInstance = conn;
-  return conn;
+  if (mongoose.connection.readyState === 1) { connected = true; return; }
+
+  await mongoose.connect(process.env.MONGODB);
+  connected = true;
 }
 

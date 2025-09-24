@@ -1,3 +1,5 @@
+// server/ApiRoutes/hotels.js
+
 import { connectDB } from "../db.js";
 import Hotel from "../models/Hotel.js";
 
@@ -14,6 +16,9 @@ export async function hotelsHandler(req, res) {
 
   try {
     await connectDB();
+    // 20250925 added
+    const Hotel = await getHotelModel();  // ← 重要：動態取得 model
+
 
     if (req.method === "GET" && !id) {
       const list = await Hotel.find().limit(50);
@@ -28,7 +33,11 @@ export async function hotelsHandler(req, res) {
     // 可再加 POST/PUT/DELETE
     return json(res, 405, { error: "method not allowed" });
   } catch (e) {
-    console.error(e);
-    return json(res, 500, { error: "server error", detail: e.message });
+    // console.error(e);
+    // return json(res, 500, { error: "server error", detail: e.message });
+
+    // 20250925 added
+    console.error("hotels handler error:", e);
+    return json(res, 500, { error: "server error", detail: String(e?.message || e) });
   }
 }
