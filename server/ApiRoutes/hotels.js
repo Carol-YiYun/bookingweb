@@ -3,8 +3,6 @@
 import { connectDB } from "../db.js";
 import { getHotelModel } from "../models/Hotel.js";
 
-// import Hotel from "../models/Hotel.js";
-
 // 共用 JSON 回應函式
 const json = (res, code, data) => {
   res.statusCode = code;
@@ -77,7 +75,7 @@ async function amountOfCities(_req, res, Hotel) {
 }
 /** ========== controllers ========== */
 
-// 主 handler
+// 僅支援 /api/v1/hotels*
 export async function hotelsHandler(req, res, getMongoose) {
   // 先記錄進來的 URL
   console.log("=== hotels handler in ===");
@@ -87,56 +85,86 @@ export async function hotelsHandler(req, res, getMongoose) {
   const parts = url.pathname.split("/").filter(Boolean); // ["api","v1","hotels", ...]
   console.log("parts =", parts);
 
-  // const id = parts[2]; // /hotels/find/:id → index 2
-  // const subPath = parts[1]; // e.g. "find", "amountoftype", "amountofcities"
+  // const id = parts[3];      // /api/v1/hotels/find/:id → index 3
+  // const subPath = parts[2]; // index 2 才是 "hotels"
   
   // const base = 2;                                       // 固定 "hotels" 的索引
   // if (parts[base] !== "hotels") return json(res, 405, { error: "method/path not allowed" });
-  const base = parts.indexOf("hotels");
-  if (base === -1) return json(res, 405, { error: "method/path not allowed" });
+  // const base = parts.indexOf("hotels");
+  // if (base === -1) return json(res, 405, { error: "method/path not allowed" });
 
 
-  const seg1 = parts[base + 1]; // 可能是 undefined | "find" | ":id" | "amountoftype" | "amountofcities"
-  const seg2 = parts[base + 2]; // 當 seg1 === "find" 時的 :id
+  // const seg1 = parts[base + 1]; // 可能是 undefined | "find" | ":id" | "amountoftype" | "amountofcities"
+  // const seg2 = parts[base + 2]; // 當 seg1 === "find" 時的 :id
+
+  // 固定 "hotels" 在 index 2
+  if (parts[2] !== "hotels") return json(res, 405, { error: "method/path not allowed" });
+
+  const seg1 = parts[3]; // 可能是 undefined | "find" | ":id" | "amountoftype" | "amountofcities"
+  const seg2 = parts[4]; // 當 seg1 === "find" 時的 :id
 
   try {
     await connectDB(getMongoose);
     const Hotel = await getHotelModel(getMongoose);
 
     // POST /api/v1/hotels
-    if (req.method === "POST" && parts[0] === "hotels" && !subPath) {
-      return createHotel(req, res, Hotel);
-    }
-
+    // if (req.method === "POST" && parts[0] === "hotels" && !subPath) {
+    //   return createHotel(req, res, Hotel);
+    // }
+    
     // GET /api/v1/hotels/find/:id
-    if (req.method === "GET" && parts[0] === "hotels" && subPath === "find" && id) {
-      return getHotel(req, res, Hotel, id);
-    }
+    // if (req.method === "GET" && parts[0] === "hotels" && subPath === "find" && id) {
+    //   return getHotel(req, res, Hotel, id);
+    // }
 
-    // PUT /api/v1/hotels/:id
-    if (req.method === "PUT" && parts[0] === "hotels" && subPath) {
-      return updatedHotel(req, res, Hotel, subPath); // subPath 在這裡就是 id
-    }
+    // // PUT /api/v1/hotels/:id
+    // if (req.method === "PUT" && parts[0] === "hotels" && subPath) {
+    //   return updatedHotel(req, res, Hotel, subPath); // subPath 在這裡就是 id
+    // }
 
-    // DELETE /api/v1/hotels/:id
-    if (req.method === "DELETE" && parts[0] === "hotels" && subPath) {
-      return deleteHotel(req, res, Hotel, subPath); // subPath 在這裡就是 id
-    }
+    // // DELETE /api/v1/hotels/:id
+    // if (req.method === "DELETE" && parts[0] === "hotels" && subPath) {
+    //   return deleteHotel(req, res, Hotel, subPath); // subPath 在這裡就是 id
+    // }
+
+    // // GET /api/v1/hotels
+    // if (req.method === "GET" && parts[0] === "hotels" && !subPath) {
+    //   return getAllHotels(req, res, Hotel);
+    // }
+
+    // // GET /api/v1/hotels/amountoftype
+    // if (req.method === "GET" && parts[0] === "hotels" && subPath === "amountoftype") {
+    //   return amountOfType(req, res, Hotel);
+    // }
+
+    // // GET /api/v1/hotels/amountofcities
+    // if (req.method === "GET" && parts[0] === "hotels" && subPath === "amountofcities") {
+    //   return amountOfCities(req, res, Hotel);
+    // }
+
+    // POST /api/v1/hotels
+    if (req.method === "POST" && !seg1) return createHotel(req, res, Hotel);
 
     // GET /api/v1/hotels
-    if (req.method === "GET" && parts[0] === "hotels" && !subPath) {
-      return getAllHotels(req, res, Hotel);
-    }
+    if (req.method === "GET" && !seg1) return getAllHotels(req, res, Hotel);
+
+    // GET /api/v1/hotels/find/:id
+    if (req.method === "GET" && seg1 === "find" && seg2) return getHotel(req, res, Hotel, seg2);
+
+    // PUT /api/v1/hotels/:id
+    if (req.method === "PUT" && seg1 && !["find","amountoftype","amountofcities"].includes(seg1))
+      return updatedHotel(req, res, Hotel, seg1);
+
+    // DELETE /api/v1/hotels/:id
+    if (req.method === "DELETE" && seg1 && !["find","amountoftype","amountofcities"].includes(seg1))
+      return deleteHotel(req, res, Hotel, seg1);
 
     // GET /api/v1/hotels/amountoftype
-    if (req.method === "GET" && parts[0] === "hotels" && subPath === "amountoftype") {
-      return amountOfType(req, res, Hotel);
-    }
+    if (req.method === "GET" && seg1 === "amountoftype") return amountOfType(req, res, Hotel);
 
     // GET /api/v1/hotels/amountofcities
-    if (req.method === "GET" && parts[0] === "hotels" && subPath === "amountofcities") {
-      return amountOfCities(req, res, Hotel);
-    }
+    if (req.method === "GET" && seg1 === "amountofcities") return amountOfCities(req, res, Hotel);
+
 
     return json(res, 405, { error: "method/path not allowed" });
   } catch (e) {
