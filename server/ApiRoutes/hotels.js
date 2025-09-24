@@ -88,37 +88,37 @@ export async function hotelsHandler(req, res, getMongoose) {
     await connectDB(getMongoose);
     const Hotel = await getHotelModel(getMongoose);
 
-    // POST /hotels
+    // POST /api/v1/hotels
     if (req.method === "POST" && parts[0] === "hotels" && !subPath) {
       return createHotel(req, res, Hotel);
     }
 
-    // GET /hotels/find/:id
+    // GET /api/v1/hotels/find/:id
     if (req.method === "GET" && parts[0] === "hotels" && subPath === "find" && id) {
       return getHotel(req, res, Hotel, id);
     }
 
-    // PUT /hotels/:id
+    // PUT /api/v1/hotels/:id
     if (req.method === "PUT" && parts[0] === "hotels" && subPath) {
       return updatedHotel(req, res, Hotel, subPath); // subPath 在這裡就是 id
     }
 
-    // DELETE /hotels/:id
+    // DELETE /api/v1/hotels/:id
     if (req.method === "DELETE" && parts[0] === "hotels" && subPath) {
       return deleteHotel(req, res, Hotel, subPath); // subPath 在這裡就是 id
     }
 
-    // GET /hotels
+    // GET /api/v1/hotels
     if (req.method === "GET" && parts[0] === "hotels" && !subPath) {
       return getAllHotels(req, res, Hotel);
     }
 
-    // GET /hotels/amountoftype
+    // GET /api/v1/hotels/amountoftype
     if (req.method === "GET" && parts[0] === "hotels" && subPath === "amountoftype") {
       return amountOfType(req, res, Hotel);
     }
 
-    // GET /hotels/amountofcities
+    // GET /api/v1/hotels/amountofcities
     if (req.method === "GET" && parts[0] === "hotels" && subPath === "amountofcities") {
       return amountOfCities(req, res, Hotel);
     }

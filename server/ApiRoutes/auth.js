@@ -88,11 +88,11 @@ export async function authHandler(req, res, getMongoose) {
     const User = await getUserModel(getMongoose);
 
     // 路由分派
-    if (req.method === "POST" && path === "/auth/register") {
+    if (req.method === "POST" && path === "/api/v1/auth/register") {
       return registerController(req, res, User);
     }
 
-    if (req.method === "POST" && path === "/auth/login") {
+    if (req.method === "POST" && path === "/api/v1/auth/login") {
       return loginController(req, res, User);
     }
 

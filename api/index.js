@@ -39,27 +39,27 @@ export default async function handler(req, res) {
     }
 
     // --- 業務路由：動態載入對應檔並注入 getMongoose ---
-    if (url.startsWith("/hotels")) {
+    if (url.startsWith("/api/v1/hotels")) {
       const mod = await import("../server/ApiRoutes/hotels.js");
       return mod.hotelsHandler(req, res, getMongoose);
     }
 
-    if (url.startsWith("/rooms")) {
+    if (url.startsWith("/api/v1/rooms")) {
       const mod = await import("../server/ApiRoutes/rooms.js");
       return mod.roomsHandler(req, res, getMongoose);
     }
 
-    if (url.startsWith("/users")) {
+    if (url.startsWith("/api/v1/users")) {
       const mod = await import("../server/ApiRoutes/users.js");
       return mod.usersHandler(req, res, getMongoose);
     }
 
-    if (url.startsWith("/auth")) {
+    if (url.startsWith("/api/v1/auth")) {
       const mod = await import("../server/ApiRoutes/auth.js");
       return mod.authHandler(req, res, getMongoose);
     }
 
-    if (url.startsWith("/order")) {
+    if (url.startsWith("/api/v1/order")) {
       const mod = await import("../server/ApiRoutes/order.js");
       return mod.orderHandler(req, res, getMongoose);
     }
