@@ -14,3 +14,14 @@ export async function connectDB() {
     console.log("MongoDB disconnected!");
   });
 }
+
+// let mongooseInstance = null;
+
+// export async function connectDB() {
+//   if (mongooseInstance) return mongooseInstance;
+//   const mongoose = (await import("mongoose")).default;
+//   const conn = await mongoose.connect(process.env.MONGODB);
+//   mongooseInstance = conn;
+//   return conn;
+// }
+
