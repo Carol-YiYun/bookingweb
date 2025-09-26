@@ -12,11 +12,11 @@ export const api = axios.create({
 });
 
 // ---- Hotels ----
-export const getHotels = () => api.get("/api/v1/hotels");
-export const getHotelById = (id) => api.get(`/api/v1/hotels/find/${id}`);
-export const createHotel = (data) => api.post("/api/v1/hotels", data);
+export const getHotels = () => api.get("/hotels");
+export const getHotelById = (id) => api.get(`/hotels/find/${id}`);
+export const createHotel = (data) => api.post("/hotels", data);
 
 // ---- Auth ----
-export const login = (data) => api.post("/api/v1/auth/login", data);
-export const register = (data) => api.post("/api/v1/auth/register", data);
+export const login = (data) => api.post("/auth/login", data);
+export const register = (data) => api.post("/auth/register", data);
 
