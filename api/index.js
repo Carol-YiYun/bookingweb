@@ -18,6 +18,18 @@ async function getMongoose() {
 
 // 3) 入口 handler
 export default async function handler(req, res) {
+
+  // ====== 加上 CORS headers ======
+  res.setHeader("Access-Control-Allow-Origin", "https://bookingweb-zeta.vercel.app"); // 或 "*" 測試用
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+  // 預檢請求 (preflight) 直接回應
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+  // ==============================
+
   const { url, method } = req;
 
   try {
