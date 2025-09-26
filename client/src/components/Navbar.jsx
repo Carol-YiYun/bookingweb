@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import "./navbar.scss"
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
