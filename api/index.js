@@ -4,20 +4,21 @@
 
 // 這段要加在 handler 最上面，統一處理 CORS
 function setCors(req, res) {
-  const ORIGIN = "https://bookingweb-zeta.vercel.app"; // 你的前端網域
-  res.setHeader("Access-Control-Allow-Origin", ORIGIN);
+  // const ORIGIN = "https://bookingweb-zeta.vercel.app"; // 你的前端網域
+  // res.setHeader("Access-Control-Allow-Origin", ORIGIN);
   res.setHeader("Vary", "Origin");
-  // res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
 
   // ★ 這裡容許 req 可能不存在
   const reqHeaders = req?.headers?.["access-control-request-headers"];
   // res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.setHeader("Access-Control-Allow-Headers",
-    req.headers["access-control-request-headers"] || "Content-Type, Authorization"
-  );
+  res.setHeader("Access-Control-Allow-Headers", reqHeaders || "Content-Type, Authorization");
+  // res.setHeader("Access-Control-Allow-Headers",
+  //   req.headers["access-control-request-headers"] || "Content-Type, Authorization"
+  // );
 
-  res.setHeader("Access-Control-Allow-Credentials", "true");
+  // res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Max-Age", "600");
 
 }
@@ -25,7 +26,7 @@ function setCors(req, res) {
 
 // 1) 共用：回傳 JSON
 const json = (res, code, data) => {
-  setCors(undefined, res);
+  setCors(undefined, res);    // 重要：每次回應都設 CORS
   res.statusCode = code;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   res.end(JSON.stringify(data));
@@ -43,10 +44,8 @@ async function getMongoose() {
 
 // 3) 入口 handler
 export default async function handler(req, res) {
-
   // CORS 設定
   setCors(req, res);          // 任何請求一進來就設
-  
 
   // 瀏覽器的預檢請求要回 200
   if (req.method === "OPTIONS") {
