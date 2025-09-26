@@ -20,3 +20,11 @@ export const createHotel = (data) => api.post("/hotels", data);
 export const login = (data) => api.post("/auth/login", data);
 export const register = (data) => api.post("/auth/register", data);
 
+
+
+// Debug: log 每次發出的完整 URL
+api.interceptors.request.use((config) => {
+  console.log("[API Request] →", (config.baseURL || "") + config.url);
+  return config;
+});
+
