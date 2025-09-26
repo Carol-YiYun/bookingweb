@@ -6,15 +6,17 @@ import { faBed, faCar, faPlane, faTaxi, faToriiGate } from '@fortawesome/free-so
 import { Link } from 'react-router-dom'
 import { LoginContext } from '../context/LoginContext'
 import { logout } from '../constants/actionTypes'
+
+
 const Navbar = ({ type }) => {
 
     const { user, dispatch } = useContext(LoginContext);
+    // 紀錄哪個 item 要顯示 tooltip
+    const [activeTip, setActiveTip] = useState(null);
+
     const handleClick = (e) => {
         dispatch({ type: logout })
     }
-
-    // 紀錄哪個 item 要顯示 tooltip
-    const [activeTip, setActiveTip] = useState(null);
 
 
     return (
@@ -54,6 +56,8 @@ const Navbar = ({ type }) => {
                             <FontAwesomeIcon icon={faBed} />
                             <span >住宿</span>
                         </div>
+
+                        {/* ▼ 修改：不改文字，額外長出 tooltip */}
                         <div 
                             className="item" 
                             onMouseEnter={() => setActiveTip("plane")}
