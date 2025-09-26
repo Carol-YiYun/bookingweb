@@ -1,8 +1,7 @@
 {
   "functions": {
     "api/index.js": {
-      "includeFiles": "server/**",
-      "externalNodeModules": ["bcryptjs", "jsonwebtoken", "mongoose"]
+      "includeFiles": "server/**"
     }
   },
   "rewrites": [
