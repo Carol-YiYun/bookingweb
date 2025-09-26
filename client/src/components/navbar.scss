@@ -90,9 +90,9 @@ height: 80px !important; //整個欄高改為80px
                 /* ▲ 新增 tooltip 樣式 */
                 .nav-tooltip {
                     position: absolute;
-                    left: calc(100% + 10px);   /* 在 item 右邊 */
-                    top: 50%;
-                    transform: translateY(-50%);
+                    top: calc(100% + 8px);   /* 在 item 底下 8px */
+                    left: 50%;
+                    transform: translateY(-50%);  /* 置中 */
                     background: #e74c3c;
                     color: #fff;
                     padding: 6px 12px;
@@ -101,16 +101,17 @@ height: 80px !important; //整個欄高改為80px
                     white-space: nowrap;
                     box-shadow: 0 2px 8px rgba(0,0,0,.2);
                     pointer-events: none;       /* 不擋滑鼠 */
+                    z-index: 10;
                 }
 
                 .nav-tooltip::after {
                     content: "";
                     position: absolute;
-                    right: 100%;
-                    top: 50%;
+                    top: -6px;   /* 從上方長出來 */
+                    left: 50%;
                     transform: translateY(-50%);
                     border: 6px solid transparent;
-                    border-right-color: #e74c3c; /* 小三角形 */
+                    border-bottom-color: #e74c3c; /* 小三角形朝上 */
                 }
             
         }
