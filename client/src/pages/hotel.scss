@@ -89,7 +89,8 @@
             border-radius: 2px;
             color: white;
             &:hover {
-                color: black;
+                // color: black;
+                color: rgb(253, 201, 122); // "現在就預訂"的按鈕字體顏色
             }
         }
     }

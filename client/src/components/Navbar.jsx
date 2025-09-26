@@ -25,7 +25,7 @@ const Navbar = ({ type }) => {
                     </div>
                     <div className="right">
                         <button className='navButtonFlag' />
-                        <button className="navButtonNotif">使用webpack測試</button>
+                        {/* <button className="navButtonNotif">使用webpack測試</button> */}
                         {type == "auth" ? <></> :
                             <>
                                 {user ? 

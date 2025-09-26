@@ -88,7 +88,7 @@
                         cursor: pointer;
                         &:hover {
                             background-color: rgba(53, 164, 127, 0.1);
-                            color: rgb(253, 201, 122);   // 👉 強制 hover 後仍是綠色
+                            // color: rgb(253, 201, 122); 
                         }
                         &:disabled{
                             cursor: not-allowed;
