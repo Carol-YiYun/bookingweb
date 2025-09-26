@@ -50,19 +50,19 @@ const Navbar = ({ type }) => {
                             <FontAwesomeIcon icon={faBed} />
                             <span >住宿</span>
                         </div>
-                        <div className="item">
+                        <div className="item" onMouseEnter={() => alert("尚未開發")}>
                             <FontAwesomeIcon icon={faPlane} />
                             <span >航班</span>
                         </div>
-                        <div className="item">
+                        <div className="item" onMouseEnter={() => alert("尚未開發")}>
                             <FontAwesomeIcon icon={faCar} />
                             <span >租車</span>
                         </div>
-                        <div className="item">
+                        <div className="item" onMouseEnter={() => alert("尚未開發")}>
                             <FontAwesomeIcon icon={faToriiGate} />
                             <span >景點/活動</span>
                         </div>
-                        <div className="item">
+                        <div className="item" onMouseEnter={() => alert("尚未開發")}>
                             <FontAwesomeIcon icon={faTaxi} />
                             <span >機場計程車</span>
                         </div>
