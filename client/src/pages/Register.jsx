@@ -1,4 +1,9 @@
-import axios from 'axios'
+// import axios from 'axios'
+
+// 改成使用 api，URL 才不會錯
+import { api } from "../api";
+
+
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
@@ -37,7 +42,9 @@ const navigate = useNavigate()
   const handleClick = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("/auth/register", registerData)
+      // const res = await axios.post("/auth/register", registerData)
+      const res = await api.post("/auth/register", registerData) // 改成使用api
+
       //成功後跳轉去login 使用我們在header searchBar用過的useNavigate
       navigate("/login",res)
       //可以把資料也傳過去

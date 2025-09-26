@@ -1,4 +1,8 @@
-import axios from 'axios';
+// import axios from 'axios';
+
+// 1) 用封裝好的 api
+import { api } from "../api";
+
 import React, { useContext, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar';
@@ -11,19 +15,24 @@ const Login = () => {
 
     const registerSuccess =useLocation() //接我們register navgate過來的res
     const{loading, error, dispatch}=useContext(LoginContext)
+
     const [loginData, setLoginData] = useState({
        account:undefined, //設置Api的時候是設置account 所以要注意不要打成username了
         password: undefined//當初這樣設計是因為我們想要讓他就算是輸入username與email都可以登入
-      })
+    })
+
     const handleChange=(e)=>{
         setLoginData(prev=>({...prev,[e.target.id]: e.target.value}))
     }
     const navigate = useNavigate()
+
     const handleClick=async(e)=>{
         e.preventDefault();
         dispatch({type:start_login})//
         try{
-            const res = await axios.post("/auth/login",loginData)
+            // const res = await axios.post("/auth/login",loginData)
+            const res = await api.post("/auth/login", loginData)   // 改成使用 api，否則URL會錯誤
+
             dispatch({type:login_success,payload:res.data.userDetails})
             navigate("/")
         }catch(error){

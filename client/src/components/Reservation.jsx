@@ -8,7 +8,9 @@ import useFetch from '../hooks/useFetch'
 import "./reservation.scss"
 import { motion } from "framer-motion";
 import { LoginContext } from '../context/LoginContext'
-import axios from 'axios'
+// import axios from 'axios'
+import { api } from "../api";
+
 import { ReservationDatesList } from '../datesCalculate'
 import useCreateOrder from '../hooks/useCreateOrder'
 import { useNavigate } from 'react-router-dom'
@@ -62,9 +64,13 @@ const Reservation = ({ openSetting, hotelid, DatesLength }) => {
         try {
           await Promise.all(
             roomNumber.map((roomNumberId) => {
-              const res = axios.put(`/rooms/reservartiondates/${roomNumberId}`, {
-                dates: datesList,
-              });
+            //   const res = axios.put(`/rooms/reservartiondates/${roomNumberId}`, {
+            //     dates: datesList,
+            //   });
+                const res = api.put(`/rooms/reservartiondates/${roomNumberId}`, {
+                    dates: datesList,
+                });
+
             })
           );
         } catch (error) {
