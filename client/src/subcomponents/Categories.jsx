@@ -14,8 +14,15 @@ const Categories = ({dataArray,url}) => {
             <div className="title">
               {item.name}
             </div>
-            <div className="desc">
+            {/* <div className="desc">
               {loading ? <Skeleton type="Amount"/> : `${data[index]}間住宿`}
+            </div> */}
+            <div className="desc">
+              {loading ? (
+                <Skeleton type="Amount"/>
+              ) : (
+                `${data[index]?.count || 0} 間住宿`
+              )}
             </div>
           </div>
         </div>)}
