@@ -16,11 +16,20 @@ const PopularHotels = ({ dataArray = [], loading }) => {
                             <Link to={`/hotels/${item._id}`} style={{ textDecoration: "none", color: "inherit" }}  key={index}>
                                 <div className="item" >
                                     {/* <img src={item.photos[0]} alt="" /> */}
-                                    {item.photos?.[0] ? (
+                                    {/* {item.photos?.[0] ? (
                                         <img src={item.photos[0]} alt={item.name || "hotel"} />
                                     ) : (
                                         <span>Not ready yet</span>
-                                    )}
+                                    )} */}
+                                    {/* 強制把 http 轉成 https，避免 Mixed Content */}
++                                   {(() => {
+                                        const raw = item?.photos?.[0] || "";
+                                        const imgUrl = raw ? raw.replace(/^http:\/\//i, "https://") : "";
+                                        return imgUrl
+                                            ? <img src={imgUrl} alt={item.name || "hotel"} />
+                                            : <span>Not ready yet</span>;
+                                    })()}
+                                        
                                     <div className="itemInfo">
                                         <div className="title">
                                             {item.name}
