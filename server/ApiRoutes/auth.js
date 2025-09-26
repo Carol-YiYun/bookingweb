@@ -7,9 +7,18 @@ import bcrypt from "bcryptjs";          // ← 新增
 import jwt from "jsonwebtoken";          // ← 新增
 
 // 共用 JSON 回應函式
-const json = (res, code, data) => {
-  res.statusCode = code;
+// const json = (res, code, data) => {
+//   res.statusCode = code;
+//   res.setHeader("Content-Type", "application/json; charset=utf-8");
+//   res.end(JSON.stringify(data));
+// };
+const json = (req, res, code, data) => {
+  const origin = req.headers.origin || "*";
+  res.setHeader("Vary", "Origin");
+  res.setHeader("Access-Control-Allow-Origin", origin);
+  res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Content-Type", "application/json; charset=utf-8");
+  res.statusCode = code;
   res.end(JSON.stringify(data));
 };
 
@@ -34,12 +43,12 @@ async function registerController(req, res, User) {
 
   // 驗證必要欄位
   if (!body.email || !body.password) {
-    return json(res, 400, { error: "email 和 password 必填" });
+    return json(req, res, 400, { error: "email 和 password 必填" });
   }
 
   // 檢查 email 是否已存在
   const exists = await User.findOne({ email: body.email });
-  if (exists) return json(res, 409, { error: "email 已被註冊" });
+  if (exists) return json(req, res, 409, { error: "email 已被註冊" });
 
   // Hash 密碼後存進資料庫
   const hashed = await bcrypt.hash(String(body.password), 10);
@@ -48,7 +57,7 @@ async function registerController(req, res, User) {
   // 回傳結果前去除 password 欄位
   const obj = created.toObject?.() || created;
   delete obj.password;
-  return json(res, 201, obj);
+  return json(req, res, 201, obj);
 }
 
 // 登入 API 對應的控制器
@@ -62,7 +71,7 @@ async function loginController(req, res, User) {
   const { account, email, password } = body || {};
   const identifier = account || email;
   if (!identifier || !password) {
-    return json(res, 400, { error: "account/email 和 password 必填" });
+    return json(req, res, 400, { error: "account/email 和 password 必填" });
   }
   // 支援用 email 或 username 登入
   const user = await User.findOne({
@@ -70,12 +79,12 @@ async function loginController(req, res, User) {
   });
 
 
-  if (!user) return json(res, 401, { error: "帳號或密碼錯誤" });
+  if (!user) return json(req, res, 401, { error: "帳號或密碼錯誤" });
 
   // 驗證密碼
   // const ok = await bcrypt.compare(String(body.password || ""), String(user.password || ""));
   const ok = await bcrypt.compare(String(password || ""), String(user.password || ""));
-  if (!ok) return json(res, 401, { error: "帳號或密碼錯誤" });
+  if (!ok) return json(req, res, 401, { error: "帳號或密碼錯誤" });
 
   // 簽發 JWT
   // const jwt = await import("jsonwebtoken");
@@ -88,7 +97,7 @@ async function loginController(req, res, User) {
   // 回傳 user 資料（去除 password）
   const obj = user.toObject?.() || user;
   delete obj.password;
-  return json(res, 200, { token, user: obj });
+  return json(req, res, 200, { token, user: obj });
 }
 /** ========== controllers ========== */
 
@@ -112,10 +121,10 @@ export async function authHandler(req, res, getMongoose) {
     }
 
     // 其他未支援的 method/path
-    return json(res, 405, { error: "不支援的 method/path" });
+    return json(req, res, 405, { error: "不支援的 method/path" });
   } catch (e) {
     console.error("auth handler error:", e);
-    return json(res, 500, { error: "伺服器錯誤", detail: String(e?.message || e) });
+    return json(req, res, 500, { error: "伺服器錯誤", detail: String(e?.message || e) });
   }
 }
 

@@ -4,9 +4,18 @@ import { connectDB } from "../db.js";
 import { getHotelModel } from "../models/Hotel.js";
 
 // 共用 JSON 回應函式
-const json = (res, code, data) => {
-  res.statusCode = code;
+// const json = (res, code, data) => {
+//   res.statusCode = code;
+//   res.setHeader("Content-Type", "application/json; charset=utf-8");
+//   res.end(JSON.stringify(data));
+// };
+const json = (req, res, code, data) => {
+  const origin = req.headers.origin || "*";
+  res.setHeader("Vary", "Origin");
+  res.setHeader("Access-Control-Allow-Origin", origin);
+  res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Content-Type", "application/json; charset=utf-8");
+  res.statusCode = code;
   res.end(JSON.stringify(data));
 };
 
@@ -30,48 +39,48 @@ async function readBody(req) {
 async function createHotel(req, res, Hotel) {
   const body = await readBody(req);
   const created = await Hotel.create(body);
-  return json(res, 201, created);
+  return json(req, res, 201, created);
 }
 
 // 取得單一 Hotel
-async function getHotel(_req, res, Hotel, id) {
+async function getHotel(req, res, Hotel, id) {
   const one = await Hotel.findById(id);
-  return one ? json(res, 200, one) : json(res, 404, { error: "not found" });
+  return one ? json(req, res, 200, one) : json(req, res, 404, { error: "not found" });
 }
 
 // 更新 Hotel
 async function updatedHotel(req, res, Hotel, id) {
   const body = await readBody(req);
   const updated = await Hotel.findByIdAndUpdate(id, body, { new: true });
-  return updated ? json(res, 200, updated) : json(res, 404, { error: "not found" });
+  return updated ? json(req, res, 200, updated) : json(req, res, 404, { error: "not found" });
 }
 
 // 刪除 Hotel
-async function deleteHotel(_req, res, Hotel, id) {
+async function deleteHotel(req, res, Hotel, id) {
   const r = await Hotel.findByIdAndDelete(id);
-  return r ? json(res, 204, {}) : json(res, 404, { error: "not found" });
+  return r ? json(req, res, 204, {}) : json(req, res, 404, { error: "not found" });
 }
 
 // 取得所有 Hotels
-async function getAllHotels(_req, res, Hotel) {
+async function getAllHotels(req, res, Hotel) {
   const list = await Hotel.find().limit(100);
-  return json(res, 200, list);
+  return json(req, res, 200, list);
 }
 
 // 按住宿類型統計
-async function amountOfType(_req, res, Hotel) {
+async function amountOfType(req, res, Hotel) {
   const data = await Hotel.aggregate([
     { $group: { _id: "$type", count: { $sum: 1 } } }
   ]);
-  return json(res, 200, data);
+  return json(req, res, 200, data);
 }
 
 // 按城市統計
-async function amountOfCities(_req, res, Hotel) {
+async function amountOfCities(req, res, Hotel) {
   const data = await Hotel.aggregate([
     { $group: { _id: "$city", count: { $sum: 1 } } }
   ]);
-  return json(res, 200, data);
+  return json(req, res, 200, data);
 }
 /** ========== controllers ========== */
 
@@ -89,16 +98,16 @@ export async function hotelsHandler(req, res, getMongoose) {
   // const subPath = parts[2]; // index 2 才是 "hotels"
   
   // const base = 2;                                       // 固定 "hotels" 的索引
-  // if (parts[base] !== "hotels") return json(res, 405, { error: "method/path not allowed" });
+  // if (parts[base] !== "hotels") return json(req, res, 405, { error: "method/path not allowed" });
   // const base = parts.indexOf("hotels");
-  // if (base === -1) return json(res, 405, { error: "method/path not allowed" });
+  // if (base === -1) return json(req, res, 405, { error: "method/path not allowed" });
 
 
   // const seg1 = parts[base + 1]; // 可能是 undefined | "find" | ":id" | "amountoftype" | "amountofcities"
   // const seg2 = parts[base + 2]; // 當 seg1 === "find" 時的 :id
 
   // 固定 "hotels" 在 index 2
-  if (parts[2] !== "hotels") return json(res, 405, { error: "method/path not allowed" });
+  if (parts[2] !== "hotels") return json(req, res, 405, { error: "method/path not allowed" });
 
   const seg1 = parts[3]; // 可能是 undefined | "find" | ":id" | "amountoftype" | "amountofcities"
   const seg2 = parts[4]; // 當 seg1 === "find" 時的 :id
@@ -166,10 +175,10 @@ export async function hotelsHandler(req, res, getMongoose) {
     if (req.method === "GET" && seg1 === "amountofcities") return amountOfCities(req, res, Hotel);
 
 
-    return json(res, 405, { error: "method/path not allowed" });
+    return json(req, res, 405, { error: "method/path not allowed" });
   } catch (e) {
     console.error("hotels handler error:", e);
-    return json(res, 500, { error: "server error", detail: String(e?.message || e) });
+    return json(req, res, 500, { error: "server error", detail: String(e?.message || e) });
   }
 }
 
@@ -177,15 +186,15 @@ export async function hotelsHandler(req, res, getMongoose) {
 
 // /** ========== controllers ========== */
 // // 取得全部 Hotels
-// async function getAllHotels(_req, res, Hotel) {
+// async function getAllHotels(req, res, Hotel) {
 //   const list = await Hotel.find().limit(50);
-//   return json(res, 200, list);
+//   return json(req, res, 200, list);
 // }
 
 // // 依 ID 取得單一 Hotel
-// async function getHotelById(_req, res, Hotel, id) {
+// async function getHotelById(req, res, Hotel, id) {
 //   const one = await Hotel.findById(id);
-//   return one ? json(res, 200, one) : json(res, 404, { error: "not found" });
+//   return one ? json(req, res, 200, one) : json(req, res, 404, { error: "not found" });
 // }
 
 // // TODO: 未來可擴充 createHotel / updateHotel / deleteHotel
@@ -213,10 +222,10 @@ export async function hotelsHandler(req, res, getMongoose) {
 //     }
 
 //     // 其他未支援的 method
-//     return json(res, 405, { error: "method not allowed" });
+//     return json(req, res, 405, { error: "method not allowed" });
 //   } catch (e) {
 //     console.error("hotels handler error:", e);
-//     return json(res, 500, { error: "server error", detail: String(e?.message || e) });
+//     return json(req, res, 500, { error: "server error", detail: String(e?.message || e) });
 //   }
 // }
 
