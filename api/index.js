@@ -16,15 +16,21 @@ async function getMongoose() {
   return mongooseInstance;
 }
 
+// 這段要加在 handler 最上面，統一處理 CORS
+function setCors(res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+}
+
+
 // 3) 入口 handler
 export default async function handler(req, res) {
 
-  // ====== 加上 CORS headers ======
-  res.setHeader("Access-Control-Allow-Origin", "https://bookingweb-zeta.vercel.app"); // 或 "*" 測試用
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  // CORS 設定
+  setCors(res); // ⭐ 一進來就設定 CORSS
 
-  // 預檢請求 (preflight) 直接回應
+  // 瀏覽器的預檢請求要回 200
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
