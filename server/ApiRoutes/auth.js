@@ -3,6 +3,8 @@
 
 import { connectDB } from "../db.js";
 import { getUserModel } from "../models/User.js";
+import bcrypt from "bcryptjs";          // ← 新增
+import jwt from "jsonwebtoken";          // ← 新增
 
 // 共用 JSON 回應函式
 const json = (res, code, data) => {
@@ -28,7 +30,7 @@ async function readBody(req) {
 // 註冊 API 對應的控制器
 async function registerController(req, res, User) {
   const body = await readBody(req);
-  const bcrypt = (await import("bcryptjs")).default;
+  
 
   // 驗證必要欄位
   if (!body.email || !body.password) {
@@ -52,18 +54,31 @@ async function registerController(req, res, User) {
 // 登入 API 對應的控制器
 async function loginController(req, res, User) {
   const body = await readBody(req);
-  const bcrypt = (await import("bcryptjs")).default;
+  // const bcrypt = (await import("bcryptjs")).default;
+
 
   // 檢查使用者是否存在
-  const user = await User.findOne({ email: body.email });
+  // const user = await User.findOne({ email: body.email });
+  const { account, email, password } = body || {};
+  const identifier = account || email;
+  if (!identifier || !password) {
+    return json(res, 400, { error: "account/email 和 password 必填" });
+  }
+  // 支援用 email 或 username 登入
+  const user = await User.findOne({
+    $or: [{ email: identifier }, { username: identifier }],
+  });
+
+
   if (!user) return json(res, 401, { error: "帳號或密碼錯誤" });
 
   // 驗證密碼
-  const ok = await bcrypt.compare(String(body.password || ""), String(user.password || ""));
+  // const ok = await bcrypt.compare(String(body.password || ""), String(user.password || ""));
+  const ok = await bcrypt.compare(String(password || ""), String(user.password || ""));
   if (!ok) return json(res, 401, { error: "帳號或密碼錯誤" });
 
   // 簽發 JWT
-  const jwt = await import("jsonwebtoken");
+  // const jwt = await import("jsonwebtoken");
   const token = jwt.sign(
     { id: String(user._id), email: user.email },
     process.env.JWT_SECRET || "secret",
