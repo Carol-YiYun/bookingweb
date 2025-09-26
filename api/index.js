@@ -7,9 +7,11 @@ function setCors(req, res) {
   const ORIGIN = "https://bookingweb-zeta.vercel.app"; // 你的前端網域
   res.setHeader("Access-Control-Allow-Origin", ORIGIN);
   res.setHeader("Vary", "Origin");
-
   // res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+
+  // ★ 這裡容許 req 可能不存在
+  const reqHeaders = req?.headers?.["access-control-request-headers"];
   // res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.setHeader("Access-Control-Allow-Headers",
     req.headers["access-control-request-headers"] || "Content-Type, Authorization"
@@ -23,7 +25,7 @@ function setCors(req, res) {
 
 // 1) 共用：回傳 JSON
 const json = (res, code, data) => {
-  setCors(res);
+  setCors(undefined, res);
   res.statusCode = code;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   res.end(JSON.stringify(data));
