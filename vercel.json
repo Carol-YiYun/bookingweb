@@ -1,14 +1,16 @@
 {
   "functions": {
     "api/index.js": {
-      "includeFiles": "server/**"
+      "includeFiles": "server/**",
+      "externalNodeModules": ["bcryptjs", "jsonwebtoken", "mongoose"]
     }
   },
   "rewrites": [
     {
       "source": "/api/v1/:path*",
       "destination": "/api/index?__path=/api/v1/:path*"
-    }
+    },
+    { "source": "/health",   "destination": "/api/index.js?__path=/health" }
   ],
   "headers": [
     {
