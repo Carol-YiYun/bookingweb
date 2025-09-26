@@ -4,6 +4,12 @@
       "includeFiles": "server/**"
     }
   },
+  "rewrites": [
+    {
+      "source": "/api/v1/:path*",
+      "destination": "/api/index?__path=/api/v1/:path*"
+    }
+  ],
   "headers": [
     {
       "source": "/api/(.*)",
