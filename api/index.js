@@ -3,30 +3,33 @@
 
 
 // 這段要加在 handler 最上面，統一處理 CORS
+// 統一處理 CORS（允許 prod / preview / 本機）
 function setCors(req, res) {
-  // const ORIGIN = "https://bookingweb-zeta.vercel.app"; // 你的前端網域
-  // res.setHeader("Access-Control-Allow-Origin", ORIGIN);
+  const origin = req.headers.origin || "";
+  const allowList = new Set([
+    "https://bookingweb-zeta.vercel.app",     // 你的前端正式網域
+    "http://localhost:3000",
+    "http://localhost:5173",
+  ]);
+  const isVercelPreview = /\.vercel\.app$/.test(origin);
+  const allowed = allowList.has(origin) || isVercelPreview;
+
   res.setHeader("Vary", "Origin");
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Origin", allowed ? origin : "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
-
-  // ★ 這裡容許 req 可能不存在
-  const reqHeaders = req?.headers?.["access-control-request-headers"];
-  // res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.setHeader("Access-Control-Allow-Headers", reqHeaders || "Content-Type, Authorization");
-  // res.setHeader("Access-Control-Allow-Headers",
-  //   req.headers["access-control-request-headers"] || "Content-Type, Authorization"
-  // );
-
-  // res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    req.headers["access-control-request-headers"] || "Content-Type, Authorization"
+  );
+  res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Max-Age", "600");
-
 }
 
 
 // 1) 共用：回傳 JSON
-const json = (res, code, data) => {
-  setCors(undefined, res);    // 重要：每次回應都設 CORS
+const json = (req, res, code, data) => {
+  setCors(req, res);    // 重要：每次回應都設 CORS
+
   res.statusCode = code;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   res.end(JSON.stringify(data));
@@ -59,8 +62,8 @@ export default async function handler(req, res) {
 
   try {
     // --- 基本測試 ---
-    if (url === "/health") return json(res, 200, { ok: true, ts: Date.now() });
-    if (url === "/api/v1/test" && method === "GET") return json(res, 200, { msg: "test ok" });
+    if (url === "/health") return json(req, res, 200, { ok: true, ts: Date.now() });
+    if (url === "/api/v1/test" && method === "GET") return json(req, res, 200, { msg: "test ok" });
 
     // --- MongoDB 連線測試（確認雲端可載入 mongoose 並可連線）---
     if (url === "/api/v1/mongo-test") {
@@ -69,9 +72,9 @@ export default async function handler(req, res) {
         if (mongoose.connection.readyState !== 1) {
           await mongoose.connect(process.env.MONGODB);
         }
-        return json(res, 200, { msg: "mongoose connected", version: mongoose.version });
+        return json(req, res, 200, { msg: "mongoose connected", version: mongoose.version });
       } catch (e) {
-        return json(res, 500, { error: "mongo-test failed", detail: String(e?.message || e) });
+        return json(req, res, 500, { error: "mongo-test failed", detail: String(e?.message || e) });
       }
     }
 
@@ -102,10 +105,10 @@ export default async function handler(req, res) {
     }
 
     // 未匹配
-    return json(res, 404, { error: "not found" });
+    return json(req, res, 404, { error: "not found" });
   } catch (e) {
     console.error("global handler error:", e);
-    return json(res, 500, { error: "server error", detail: String(e?.message || e) });
+    return json(req, res, 500, { error: "server error", detail: String(e?.message || e) });
   }
 }
 
