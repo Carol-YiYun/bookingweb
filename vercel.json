@@ -3,7 +3,5 @@
     "api/index.js": {
       "includeFiles": "server/**"
     }
-  },
-  "installCommand": "npm ci --prefix api",
-  "buildCommand": "echo no-build"
+  }
 }
