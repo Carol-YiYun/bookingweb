@@ -1,8 +1,20 @@
 // api/index.js
 // 單一 Serverless handler：不使用 express / serverless-http
 
+
+// 這段要加在 handler 最上面，統一處理 CORS
+function setCors(res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Max-Age", "600");
+
+}
+
+
 // 1) 共用：回傳 JSON
 const json = (res, code, data) => {
+  setCors(res);
   res.statusCode = code;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   res.end(JSON.stringify(data));
@@ -16,12 +28,6 @@ async function getMongoose() {
   return mongooseInstance;
 }
 
-// 這段要加在 handler 最上面，統一處理 CORS
-function setCors(res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-}
 
 
 // 3) 入口 handler
@@ -32,7 +38,9 @@ export default async function handler(req, res) {
 
   // 瀏覽器的預檢請求要回 200
   if (req.method === "OPTIONS") {
-    return res.status(200).end();
+    // return res.status(200).end();
+    res.statusCode = 204;       // No Content
+    return res.end();           // 立刻結束
   }
   // ==============================
 
