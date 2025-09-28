@@ -1,6 +1,9 @@
 // api/index.js
 // 單一 Serverless handler：不使用 express / serverless-http
 
+// 確保打包時包含這兩個相依
+import "bcryptjs";
+import "jsonwebtoken";
 
 // 這段要加在 handler 最上面，統一處理 CORS
 // 統一處理 CORS（允許 prod / preview / 本機）
