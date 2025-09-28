@@ -4,7 +4,8 @@
 import { api } from "../api";
 
 import React, { useContext, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+// import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar';
 
 import { login_failure, login_success, start_login } from '../constants/actionTypes';
@@ -13,8 +14,9 @@ import { LoginContext } from '../context/LoginContext';
 import "./login.scss"
 const Login = () => {
 
-    const registerSuccess =useLocation() //接我們register navgate過來的res
-    const{loading, error, dispatch}=useContext(LoginContext)
+    // const registerSuccess =useLocation() //接我們register navgate過來的res
+    // const{loading, error, dispatch}=useContext(LoginContext)
+    const { dispatch } = useContext(LoginContext)
 
     // const [loginData, setLoginData] = useState({
     //    account:undefined, //設置Api的時候是設置account 所以要注意不要打成username了
