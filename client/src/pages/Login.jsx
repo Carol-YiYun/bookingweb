@@ -47,7 +47,7 @@ const Login = () => {
         }catch(error){
             console.log(error.response)
             // dispatch({type:login_failure,payload:error.response.data})
-            dispatch({ type: login_failure, payload: err.response?.data || { error: 'login failed' } }) // ★ 改：安全取值
+            dispatch({ type: login_failure, payload: error.response?.data || { error: 'login failed' } }) // ★ 改：安全取值
         }
     }
     return (
