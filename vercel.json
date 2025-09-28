@@ -1,7 +1,11 @@
 {
   "functions": {
     "api/index.js": {
-      "includeFiles": "server/**"
+      "includeFiles": [
+        "server/**",
+        "api/node_modules/bcryptjs/**",
+        "api/node_modules/jsonwebtoken/**"
+      ]
     }
   },
   "rewrites": [
