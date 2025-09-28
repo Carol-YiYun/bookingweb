@@ -18,6 +18,13 @@ import { useNavigate } from 'react-router-dom'
 const Reservation = ({ openSetting, hotelid, DatesLength }) => {
     const { data, loading, error } = useFetch(`/rooms/findHotel/${hotelid}`)
     const { date, options } = useContext(OptionsContext)
+
+    // ▲ 安全地取得入住/退房日期（未選日期時給預設：今天～明天）
+   const hasRange = Array.isArray(date) && date[0]?.startDate && date[0]?.endDate;
+   const start = hasRange ? new Date(date[0].startDate) : new Date();
+   const end   = hasRange ? new Date(date[0].endDate)   : new Date(Date.now() + 24*60*60*1000);
+
+
     const { user } = useContext(LoginContext)
     //在這邊建立我們的order訂單，同時新增我們的room的unavailableDates的時間
     //並之後在爬梳unavailableDates如果發現有客戶有選的時間跟我們的unavailableDates有衝突就不讓他勾選
@@ -30,15 +37,20 @@ const Reservation = ({ openSetting, hotelid, DatesLength }) => {
         RoomNumberId: [],
         ReservationDates: [
             {
-                startDate: date[0].startDate,
-                endDate: date[0].endDate,
+                // startDate: date[0].startDate,
+                startDate: start,
+                // endDate: date[0].endDate,
+                endDate: end,
             }
         ],
         totalPrice: 0,
         options: {
-            adult: options.adult,
-            children: options.children,
-            rooms: options.room,
+            // adult: options.adult,
+            adult: options?.adult ?? 1,
+            // children: options.children,
+            children: options?.children ?? 0,
+            // rooms: options.room,
+            rooms: options?.room ?? 1,
         }
     })
 
@@ -53,7 +65,10 @@ const Reservation = ({ openSetting, hotelid, DatesLength }) => {
         );
     }
 
-    const { datesList } = ReservationDatesList(date[0]?.startDate, date[0]?.endDate)
+    // const { datesList } = ReservationDatesList(date[0]?.startDate, date[0]?.endDate)
+    // ▲ 產生連續日期：改用安全日期
+    const { datesList } = ReservationDatesList(start, end)
+
     console.log(datesList)
     
     const [createOrderState, setCreateOrderState] = useState(false)
@@ -62,16 +77,21 @@ const Reservation = ({ openSetting, hotelid, DatesLength }) => {
     //order就可以是創建成功的回傳的訂單資訊
     const updatedReservationDates = async () => {
         try {
+            // ▲ 記得 return promise，Promise.all 才會等待
           await Promise.all(
-            roomNumber.map((roomNumberId) => {
+            // roomNumber.map((roomNumberId) => {
             //   const res = axios.put(`/rooms/reservartiondates/${roomNumberId}`, {
             //     dates: datesList,
             //   });
-                const res = api.put(`/rooms/reservartiondates/${roomNumberId}`, {
-                    dates: datesList,
-                });
+                // const res = api.put(`/rooms/reservartiondates/${roomNumberId}`, {
+                //     dates: datesList,
+                // });
 
-            })
+            roomNumber.map((roomNumberId) =>
+                api.put(`/rooms/reservartiondates/${roomNumberId}`, { dates: datesList })
+
+            // })
+            )
           );
         } catch (error) {
             console.log("上傳日期失敗")
@@ -80,7 +100,9 @@ const Reservation = ({ openSetting, hotelid, DatesLength }) => {
     const navgate = useNavigate()
     const handleClick = async () => {
         try {//這邊要塞兩個 一個創建訂單 一個更新unavavilableDates
-            await setOrderData((item) => ({ ...item, RoomNumberId: roomNumber }))
+            // await setOrderData((item) => ({ ...item, RoomNumberId: roomNumber }))
+            // ▲ setState 非 async；直接同步更新
+            setOrderData((item) => ({ ...item, RoomNumberId: roomNumber }))
             setCreateOrderState(true)//更改值，讓useCreateOrder可以被啟動
             updatedReservationDates()
             setTimeout(()=>navgate("/"), 5000)
@@ -90,9 +112,13 @@ const Reservation = ({ openSetting, hotelid, DatesLength }) => {
     }
 
     const isNotAvailableDate = (roomNumber) => {
-        const isitNotAvailable = 
-        roomNumber.unavailableDates.some((dates) => datesList.includes(new Date(dates).getTime()))
-        return isitNotAvailable
+        // ▲ 防守：沒有 unavailableDates 時視為可選
+        // const isitNotAvailable = 
+        // roomNumber.unavailableDates.some((dates) => datesList.includes(new Date(dates).getTime()))
+        // return isitNotAvailable
+        return Array.isArray(roomNumber?.unavailableDates)
+          ? roomNumber.unavailableDates.some(d => datesList.includes(new Date(d).getTime()))
+          : false;
     }
 
     
@@ -111,7 +137,9 @@ const Reservation = ({ openSetting, hotelid, DatesLength }) => {
                 <div className="wrapper">
                     <div className="title">
                         <h2>空房情況</h2>
-                        <p>{format(date[0]?.startDate, "MM/dd/yyyy")} - {format(date[0]?.endDate, "MM/dd/yyyy")} 入住 {DatesLength} 晚 </p>
+                        {/* <p>{format(date[0]?.startDate, "MM/dd/yyyy")} - {format(date[0]?.endDate, "MM/dd/yyyy")} 入住 {DatesLength} 晚 </p> */}
+                        {/* ▲ 顯示也用安全日期 */}
+                        <p>{format(start, "MM/dd/yyyy")} - {format(end, "MM/dd/yyyy")} 入住 {DatesLength} 晚 </p>
                         <FontAwesomeIcon icon={faCircleXmark} onClick={() => openSetting(false)} />
                     </div>
                     <div className="body">
