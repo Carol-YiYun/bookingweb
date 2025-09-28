@@ -3,8 +3,11 @@
 
 import { connectDB } from "../db.js";
 import { getUserModel } from "../models/User.js";
-import bcrypt from "bcryptjs";          // ← 新增靜態匯入
-import jwt from "jsonwebtoken";          // ← 新增靜態匯入
+// import bcrypt from "bcryptjs";          // ← 新增靜態匯入
+// import jwt from "jsonwebtoken";          // ← 新增靜態匯入
+
+import bcrypt from "../../api/node_modules/bcryptjs/index.js";
+import jwt from "../../api/node_modules/jsonwebtoken/index.js";
 
 // 共用 JSON 回應函式
 // const json = (res, code, data) => {
