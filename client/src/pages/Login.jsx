@@ -16,9 +16,14 @@ const Login = () => {
     const registerSuccess =useLocation() //接我們register navgate過來的res
     const{loading, error, dispatch}=useContext(LoginContext)
 
+    // const [loginData, setLoginData] = useState({
+    //    account:undefined, //設置Api的時候是設置account 所以要注意不要打成username了
+    //     password: undefined//當初這樣設計是因為我們想要讓他就算是輸入username與email都可以登入
+    // })
+
     const [loginData, setLoginData] = useState({
-       account:undefined, //設置Api的時候是設置account 所以要注意不要打成username了
-        password: undefined//當初這樣設計是因為我們想要讓他就算是輸入username與email都可以登入
+        account: "",           // ★ 改成空字串，避免送出 undefined
+        password: ""
     })
 
     const handleChange=(e)=>{
@@ -33,11 +38,14 @@ const Login = () => {
             // const res = await axios.post("/auth/login",loginData)
             const res = await api.post("/auth/login", loginData)   // 改成使用 api，否則URL會錯誤
 
-            dispatch({type:login_success,payload:res.data.userDetails})
+            localStorage.setItem("token", res.data.token)             // ★ 新增：儲存 JWT
+            // dispatch({type:login_success,payload:res.data.userDetails})
+            dispatch({ type: login_success, payload: res.data })      // ★ 改：丟整個 res.data（含 user 與 token）
             navigate("/")
         }catch(error){
             console.log(error.response)
-            dispatch({type:login_failure,payload:error.response.data})
+            // dispatch({type:login_failure,payload:error.response.data})
+            dispatch({ type: login_failure, payload: err.response?.data || { error: 'login failed' } }) // ★ 改：安全取值
         }
     }
     return (
