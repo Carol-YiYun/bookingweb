@@ -1,27 +1,13 @@
-# Fullstack Project
+#Fullstack Project
 
-This repository contains a fullstack web application with three parts:
+This repository contains a fullstack web application with three main parts:
+	•	client/ – React frontend for users
+	•	admin/ – React/Vite admin dashboard
+	•	api/ – Node.js/Express backend API
 
-- **client/** – React frontend for users (default port: 3000)  
-- **admin/** – React/Vite admin dashboard (default port: 3000)  
-- **api/** – Node.js/Express backend API (default port: 5000)  
+#Tech Stack
+React • Vite • Node.js • Express • MongoDB • RESTful API
 
-## Development
+#Live Demo
 
-Clone the repository and install dependencies for each part:
-
-```bash
-# Client
-cd client
-npm install
-npm start
-
-# Admin
-cd admin
-npm install
-npm start
-
-# API
-cd api
-npm install
-npm run dev   # or npm start
+👉 https://bookingweb-zeta.vercel.app/
